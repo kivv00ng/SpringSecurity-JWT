@@ -2,6 +2,7 @@ package com.cos.security1.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -9,6 +10,10 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity //스프링 시큐리티 필터가 스프링 필터체인에 등록 (스프링 필터 사용해봣쥬?)
+
+//securedEnabled: @Secured 어노테이션 활성화 => controller에서 특정 url처리 메서드에 적용시 필터적용
+//prePostEnabled: @PreAuthorize 어노테이션 활성 => controller 에서 url처리 메서드가 호출되기 전에 실행
+@EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
 public class SecurityConfig{
     //해당 메서드의 리턴되는 오브젝트를 IoC로 등록해준다.
     @Bean
@@ -16,14 +21,13 @@ public class SecurityConfig{
         return new BCryptPasswordEncoder();
     }
 
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf().disable();
         http.authorizeRequests()
                 .antMatchers("/user/**").authenticated()
-                .antMatchers("/manager/**").hasAnyRole("ROLE_ADMIN", "ROLE_MANAGER")
-                .antMatchers("/admin").hasAnyRole("ROLE_ADMIN")
+                .antMatchers("/manager/**").access("hasAnyRole('ROLE_MANAGER','ROLE_ADMIN')")
+                .antMatchers("/admin/**").access("hasRole('ROLE_ADMIN')")
                 .anyRequest().permitAll()
                 .and()
                 .formLogin()

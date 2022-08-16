@@ -4,6 +4,8 @@ import com.cos.security1.model.User;
 import com.cos.security1.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -54,10 +56,12 @@ public class IndexController {
     @PostMapping("/join")
     public String join(@ModelAttribute JoinForm joinForm){
         String rawPassword = joinForm.getPassword();
+
+        //비밀번호 암호화
         String encPassword = bCryptPasswordEncoder.encode(rawPassword);
 
         User user = User.CreateUser(
-                joinForm.getName(),
+                joinForm.getUsername(),
                 encPassword,
                 joinForm.getEmail(),
                 "ROLE_USER");
@@ -65,6 +69,20 @@ public class IndexController {
         userRepository.save(user);
 
         return "redirect:/loginForm";
+    }
+
+    @Secured("ROLE_ADMIN")
+    @GetMapping("/info")
+    @ResponseBody
+    public String inf(){
+        return "개인정보";
+    }
+
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
+    @GetMapping("/data")
+    @ResponseBody
+    public String data(){
+        return "데이터정보";
     }
 
 }

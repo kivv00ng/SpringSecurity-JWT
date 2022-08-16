@@ -24,5 +24,11 @@ public class UserRepository{
     }
 
 
-
+    @Transactional(readOnly = true)
+    public User findByUsername(String username) {
+        User userEntity = em.createQuery("select m from User m where m.username =: username", User.class)
+                .setParameter("username", username)
+                .getSingleResult();
+        return userEntity;
+    }
 }

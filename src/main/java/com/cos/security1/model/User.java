@@ -11,6 +11,7 @@ import java.sql.Timestamp;
 
 @Entity
 public class User {
+
     @Id
     @GeneratedValue(strategy =  GenerationType.IDENTITY)
     private int id;
@@ -20,6 +21,30 @@ public class User {
     private String role; //ROLE_USER, ROLE_ADMIN
     @CreationTimestamp
     private Timestamp createDate;
+
+    public int getId() {
+        return id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public Timestamp getCreateDate() {
+        return createDate;
+    }
 
     protected User(){}
     public static User CreateUser(String username, String password, String email, String role){
