@@ -11,18 +11,30 @@ package com.cos.security1.auth;
 
 
 import com.cos.security1.model.User;
+import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
-public class PrincipalDetails implements UserDetails {
+@Data
+public class PrincipalDetails implements UserDetails, OAuth2User {
 
     private User user;
+    private Map<String, Object> attributes;
 
+    //일반 로그인
     public PrincipalDetails(User user) {
         this.user = user;
+    }
+
+    //oauth 로그인
+    public PrincipalDetails(User user, Map<String, Object> attributes) {
+        this.user = user;
+        this.attributes = attributes;
     }
 
     //해당 유저의 권한을 리턴하는 곳!!
@@ -67,5 +79,15 @@ public class PrincipalDetails implements UserDetails {
     public boolean isEnabled() {
         //장기간 이용x => 휴면계저일시
         return true;
+    }
+
+    @Override
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+
+    @Override
+    public String getName() {
+        return (String) attributes.get("sub");
     }
 }

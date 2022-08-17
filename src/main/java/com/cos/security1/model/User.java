@@ -1,5 +1,6 @@
 package com.cos.security1.model;
 
+import lombok.Builder;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -21,6 +22,9 @@ public class User {
     private String role; //ROLE_USER, ROLE_ADMIN
     @CreationTimestamp
     private Timestamp createDate;
+
+    private String provider;
+    private String providerId;
 
     public int getId() {
         return id;
@@ -47,14 +51,32 @@ public class User {
     }
 
     protected User(){}
-    public static User CreateUser(String username, String password, String email, String role){
+
+
+    public static User CreateUser(String username, String password, String email, String role, String provider, String providerId){
         User user = new User();
 
         user.username = username;
         user.password = password;
         user.email = email;
         user.role = role;
+        user.provider = provider;
+        user.providerId = providerId;
 
         return user;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", email='" + email + '\'' +
+                ", role='" + role + '\'' +
+                ", createDate=" + createDate +
+                ", provider='" + provider + '\'' +
+                ", providerId='" + providerId + '\'' +
+                '}';
     }
 }
