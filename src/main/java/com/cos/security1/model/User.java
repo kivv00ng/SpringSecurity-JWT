@@ -1,7 +1,5 @@
 package com.cos.security1.model;
 
-import lombok.Builder;
-import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.Entity;

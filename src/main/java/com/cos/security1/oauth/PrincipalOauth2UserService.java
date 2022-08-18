@@ -1,14 +1,11 @@
 package com.cos.security1.oauth;
 
+import com.cos.security1.auth.CustomBCryptPasswordEncoder;
 import com.cos.security1.auth.PrincipalDetails;
 import com.cos.security1.model.User;
 import com.cos.security1.repository.UserRepository;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -20,8 +17,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
 
-    //순환 참조로 따로 생성하여 주었다. 추후에 구조를 바꾸던가 주입방식을 변경하여보자..ㅜ
-    private BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+    private final CustomBCryptPasswordEncoder bCryptPasswordEncoder;
     private final UserRepository userRepository;
 
     //구글로부터 받은 userRequest데이터에 대한 후처리를 하는 함수
