@@ -6,7 +6,7 @@ build/
 !**/src/test/**/build/
 
 # ignore properties file
-application-aouth.properties
+application-oauth.properties
 
 ### STS ###
 .apt_generated
