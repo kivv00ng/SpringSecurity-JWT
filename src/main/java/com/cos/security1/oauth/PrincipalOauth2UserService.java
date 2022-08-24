@@ -1,7 +1,7 @@
 package com.cos.security1.oauth;
 
-import com.cos.security1.auth.CustomBCryptPasswordEncoder;
-import com.cos.security1.auth.PrincipalDetails;
+import com.cos.security1.config.auth.CustomBCryptPasswordEncoder;
+import com.cos.security1.config.auth.PrincipalDetails;
 import com.cos.security1.model.User;
 import com.cos.security1.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

@@ -1,15 +1,22 @@
 package com.cos.security1.config;
 
+import com.cos.security1.config.jwt.JwtAuthenticationFilter;
+import com.cos.security1.config.jwt.JwtAuthorizationFilter;
 import com.cos.security1.oauth.PrincipalOauth2UserService;
+import com.cos.security1.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.filter.CorsFilter;
 
 //1.코드 받기(인증) 2. 엑세스토큰(권한) 3.사용자프로필 정보를 가져옴
 //      4-1. 정보를 토대로 회원가입 자동으로 진행
@@ -22,7 +29,7 @@ import org.springframework.security.web.SecurityFilterChain;
 //securedEnabled: @Secured 어노테이션 활성화 => controller에서 특정 url처리 메서드에 적용시 필터적용
 //prePostEnabled: @PreAuthorize 어노테이션 활성 => controller 에서 url처리 메서드가 호출되기 전에 실행
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 public class SecurityConfig{
     private final PrincipalOauth2UserService principalOauth2UserService;
 
@@ -35,8 +42,45 @@ public class SecurityConfig{
 
      */
 
+    private final UserRepository userRepository;
+    private final CorsFilter corsFilter;
+    private final AuthenticationManager authenticationManager;
+    private final String secretKey;
+
+    public SecurityConfig(PrincipalOauth2UserService principalOauth2UserService, UserRepository userRepository, CorsFilter corsFilter, AuthenticationManager authenticationManager, @Value("${jwt.secretKey}") String secretKey) {
+        this.principalOauth2UserService = principalOauth2UserService;
+        this.userRepository = userRepository;
+        this.corsFilter = corsFilter;
+        this.authenticationManager = authenticationManager;
+        this.secretKey = secretKey;
+    }
+
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChainV2(HttpSecurity http) throws Exception {
+        //http.addFilterBefore(new MyFilter3(), UsernamePasswordAuthenticationFilter.class);
+        http.csrf().disable();
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .addFilter(corsFilter) //@CorssOrigin(인증X 경우에 사용), 시큐리티 필터에 등록(인증이 있을경우에 사용)
+                .formLogin().disable()
+                .httpBasic().disable()
+                .addFilter(new JwtAuthenticationFilter(authenticationManager,secretKey)) //AuthenticationManager
+                .addFilter(new JwtAuthorizationFilter(authenticationManager, userRepository,secretKey)) //AuthenticationManager
+                .authorizeRequests()
+                .antMatchers("/api/v1/user/**")
+                .access("hasAnyRole('ROLE_USER' ,'ROLE_MANAGER','ROLE_ADMIN')")
+                .antMatchers("/api/v1/manager/**")
+                .access("hasAnyRole('ROLE_MANAGER','ROLE_ADMIN')")
+                .antMatchers("/api/v1/admin/**")
+                .access("hasRole('ROLE_ADMIN')")
+                .anyRequest().permitAll();
+
+        return http.build();
+    }
+
+    /*
+    @Bean
+    public SecurityFilterChain filterChainV1(HttpSecurity http) throws Exception {
         http.csrf().disable();
         http.authorizeRequests()
                 .antMatchers("/user/**").authenticated()
@@ -56,6 +100,8 @@ public class SecurityConfig{
 
         return http.build();
     }
+
+     */
 
     /*
     기존: WebSecurityConfigurerAdapter를 상속하고 configure매소드를 오버라이딩하여 설정하는 방법

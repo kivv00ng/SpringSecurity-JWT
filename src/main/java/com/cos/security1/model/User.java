@@ -7,6 +7,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Entity
 public class User {
@@ -17,7 +20,7 @@ public class User {
     private String username;
     private String password;
     private String email;
-    private String role; //ROLE_USER, ROLE_ADMIN
+    private String roles; //ROLE_USER, ROLE_ADMIN
     @CreationTimestamp
     private Timestamp createDate;
 
@@ -40,24 +43,23 @@ public class User {
         return email;
     }
 
-    public String getRole() {
-        return role;
+    public List<String> getRoleList(){
+        if(this.roles.length() >0){
+            return Arrays.asList(this.roles.split(","));
+        }
+        return new ArrayList<>();
     }
 
-    public Timestamp getCreateDate() {
-        return createDate;
-    }
 
     protected User(){}
 
-
-    public static User CreateUser(String username, String password, String email, String role, String provider, String providerId){
+    public static User CreateUser(String username, String password, String email, String roles, String provider, String providerId){
         User user = new User();
 
         user.username = username;
         user.password = password;
         user.email = email;
-        user.role = role;
+        user.roles = roles;
         user.provider = provider;
         user.providerId = providerId;
 
@@ -71,7 +73,7 @@ public class User {
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +
                 ", email='" + email + '\'' +
-                ", role='" + role + '\'' +
+                ", roles='" + roles + '\'' +
                 ", createDate=" + createDate +
                 ", provider='" + provider + '\'' +
                 ", providerId='" + providerId + '\'' +

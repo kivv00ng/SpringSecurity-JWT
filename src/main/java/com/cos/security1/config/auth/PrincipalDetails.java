@@ -1,4 +1,4 @@
-package com.cos.security1.auth;
+package com.cos.security1.config.auth;
 
 
 //시큐리티가 /login 주소 요청이 오면 낚아채서 로그인을 진행시킨다.
@@ -40,14 +40,13 @@ public class PrincipalDetails implements UserDetails, OAuth2User {
     //해당 유저의 권한을 리턴하는 곳!!
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Collection<GrantedAuthority> collection = new ArrayList<>();
-        collection.add(new GrantedAuthority() {
-            @Override
-            public String getAuthority() {
-                return user.getRole();
-            }
+        Collection<GrantedAuthority> authorities = new ArrayList<>();
+
+        user.getRoleList().forEach(role->{
+            authorities.add(()-> role);
         });
-        return collection;
+
+        return authorities;
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.cos.security1.controller;
 
-import com.cos.security1.auth.PrincipalDetails;
+import com.cos.security1.config.auth.PrincipalDetails;
 import com.cos.security1.model.User;
 import com.cos.security1.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -9,14 +9,10 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 @Controller //view 리턴
 @Slf4j
@@ -59,22 +55,11 @@ public class IndexController {
     //@AuthenticationPrcinipal을 사용하면 따로 다운그레이 안해도 됨.
    @GetMapping("/user")
     @ResponseBody
-    public String user(@AuthenticationPrincipal PrincipalDetails principalDetails){
+    public String userV1(@AuthenticationPrincipal PrincipalDetails principalDetails){
         log.info("principalDetails: "+principalDetails.getUser());
         return "user";
     }
 
-    @GetMapping("/admin")
-    @ResponseBody
-    public String admin(){
-        return "admin";
-    }
-
-    @GetMapping("/manager")
-    @ResponseBody
-    public String manager(){
-        return "manager";
-    }
 
     @GetMapping("/loginForm")
     public String loginFrom(){
@@ -86,8 +71,30 @@ public class IndexController {
         return "joinForm";
     }
 
+    //form형식으로 사용시
+    //@PostMapping("/join")
+    public String joinV1(@ModelAttribute JoinForm joinForm){
+        String rawPassword = joinForm.getPassword();
+
+        //비밀번호 암호화
+        String encPassword = bCryptPasswordEncoder.encode(rawPassword);
+
+        User user = User.CreateUser(
+                joinForm.getUsername(),
+                encPassword,
+                joinForm.getEmail(),
+                "ROLE_USER",
+                null,
+                null);
+
+        userRepository.save(user);
+
+        return "redirect:/loginForm";
+    }
+
+    //json형태(postman 사용시)
     @PostMapping("/join")
-    public String join(@ModelAttribute JoinForm joinForm){
+    public String joinV2(@RequestBody JoinForm joinForm){
         String rawPassword = joinForm.getPassword();
 
         //비밀번호 암호화
@@ -118,6 +125,28 @@ public class IndexController {
     @ResponseBody
     public String data(){
         return "데이터정보";
+    }
+
+    //user, manager, admin 권한만 접근가능
+    @GetMapping("/api/v1/user")
+    @ResponseBody
+    public String userV2(){
+
+        return "user";
+    }
+
+    //manager, admin 권한만 접근가능
+    @GetMapping("/api/v1/manager")
+    @ResponseBody
+    public String manager(){
+        return "manager";
+    }
+
+    //admin 권한만 접근가능
+    @GetMapping("/api/v1/admin")
+    @ResponseBody
+    public String admin(){
+        return "admin";
     }
 
 }
